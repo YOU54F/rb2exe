@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -e
+set -e
 export TMPDIR=`mktemp -d /tmp/selfextract.XXXXXX`
 export ARGV=$@
 
