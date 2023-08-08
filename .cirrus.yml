@@ -35,25 +35,11 @@ macos_x64_task:
 linux_arm_task: 
   env:
     TARGET: la64
-    PATH: "/root/.rbenv/shims:/root/.rbenv/bin:$PATH"
-    TMPDIR: "/tmp"
   arm_container:
-    # image: ubuntu:22.04
     image: ruby:3.2.2-slim
     cpu: 1
     memory: 1G
   pre_req_script: apt update --yes && apt install --yes git zip curl
-  # setup_script: |
-  #     echo $PATH
-  #     apt-get update
-  #     apt-get install -y --force-yes build-essential curl git
-  #     apt-get install -y --force-yes zlib1g-dev libssl-dev libreadline-dev libyaml-dev libxml2-dev libxslt-dev
-  #     apt-get clean
-  #     git clone https://github.com/rbenv/rbenv.git /root/.rbenv
-  #     git clone https://github.com/rbenv/ruby-build.git /root/.rbenv/plugins/ruby-build
-  #     rbenv install 3.2.2
-  #     rbenv global 3.2.2
-  #     ruby --version
   cirrus_cli_script: |
     chmod +x bin/*
     mkdir -p /tmp/cirrus-ci/working-dir/bin
@@ -61,19 +47,14 @@ linux_arm_task:
   bundler_setup_script: |
       gem install bundler -v 2.4.18
   << : *BUILD_TEST_TASK_TEMPLATE
-  # binary_artifacts:
-  #   path: "pkg/*"
 
 linux_amd_task: 
   env:
     TARGET: lx64
-    # PATH: "$HOME/.rbenv/bin:/root/.rbenv/shims:$PATH"
-  arm_container:
+  container:
     image: ruby:3.2.2-slim
     cpu: 1
     memory: 1G
   pre_req_script: apt update --yes && apt install --yes git zip curl
   ruby_setup_script: gem install bundler -v 2.4.18
   << : *BUILD_TEST_TASK_TEMPLATE
-  # binary_artifacts:
-  #   path: "pkg/*"
