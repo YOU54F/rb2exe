@@ -58,4 +58,5 @@ jobs:
       run: |
         ls pact-broker-app-${{ matrix.os }}
         chmod +x pact-broker-app-${{ matrix.os }}/pact-broker-app
-        ./pact-broker-app-${{ matrix.os }}/pact-broker-app
+        ./pact-broker-app-${{ matrix.os }}/pact-broker-app ../ruby/config.ru
+    - run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 -- echo "pact broker is up"
