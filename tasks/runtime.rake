@@ -18,8 +18,8 @@ task package: [
   'package:linux:arm64',
   'package:osx:x86_64',
   'package:osx:arm64',
-  'package:windows:x86_64',
-  'package:windows:x86'
+  # 'package:windows:x86_64',
+  # 'package:windows:x86'
 ]
 
 namespace :package do
@@ -89,14 +89,14 @@ def create_package(version, source_target, package_target, _os_type)
   sh "mkdir -p bin/traveling-ruby-#{TRAVELING_RB_VERSION}/#{package_target}"
   tar_command = `tar --version`
   if tar_command.include?("GNU tar")
-    sh "tar --warning=no-unknown-keyword -xzf build/traveling-ruby-#{version}-#{source_target}.tar.gz -C bin/traveling-ruby-#{TRAVELING_RB_VERSION}/#{package_target}"
+    sh "tar --warning=no-unknown-keyword -xzf build/traveling-ruby-#{version}-#{source_target}-full.tar.gz -C bin/traveling-ruby-#{TRAVELING_RB_VERSION}/#{package_target}"
   else
-    sh "tar -xzf build/traveling-ruby-#{version}-#{source_target}.tar.gz -C bin/traveling-ruby-#{TRAVELING_RB_VERSION}/#{package_target}"
+    sh "tar -xzf build/traveling-ruby-#{version}-#{source_target}-full.tar.gz -C bin/traveling-ruby-#{TRAVELING_RB_VERSION}/#{package_target}"
   end
-  sh "rm build/traveling-ruby-#{version}-#{source_target}.tar.gz"
+  sh "rm build/traveling-ruby-#{version}-#{source_target}-full.tar.gz"
 end
 
 def download_runtime(version, target)
   sh 'mkdir -p build && cd build && curl -L -O --fail ' +
-     "https://github.com/YOU54F/traveling-ruby/releases/download/rel-#{TRAVELING_RUBY_PKG_DATE}/traveling-ruby-#{version}-#{target}.tar.gz"
+     "https://github.com/YOU54F/traveling-ruby/releases/download/rel-#{TRAVELING_RUBY_PKG_DATE}/traveling-ruby-#{version}-#{target}-full.tar.gz"
 end
