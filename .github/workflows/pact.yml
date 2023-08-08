@@ -33,8 +33,9 @@ jobs:
       run: bundle exec rb2exe pact-broker-app.rb --target=ox64 --daemon
       if: runner.os == 'MacOS'
     - name: Test app
-      run: ./pact-broker-app ../ruby/config.ru
+      run: ./pact-broker-app ../ruby/config.ru -P ~/pact_broker.pid
     - run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 -- echo "pact broker is up"
+    - run: cat ~/pact_broker.pid | xargs kill
     - name: Upload app
       uses: actions/upload-artifact@v3
       with:
@@ -58,5 +59,6 @@ jobs:
       run: |
         ls pact-broker-app-${{ matrix.os }}
         chmod +x pact-broker-app-${{ matrix.os }}/pact-broker-app
-        ./pact-broker-app-${{ matrix.os }}/pact-broker-app ../ruby/config.ru
+        ./pact-broker-app-${{ matrix.os }}/pact-broker-app ../ruby/config.ru -P ~/pact_broker.pid
     - run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 -- echo "pact broker is up"
+    - run: cat ~/pact_broker.pid | xargs kill

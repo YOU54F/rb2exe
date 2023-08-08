@@ -8,6 +8,12 @@ set -e
 # $4: __IS_RAILS__
 #####
 
+echo "CDIR: $1"
+echo "TMPDIR: $2"
+echo "RUBY_COMMAND: $3"
+echo "IS_RAILS: $4"
+echo "ARGV: $ARGV"
+
 # Figure out where this script is located.
 SELFDIR="`dirname \"$0\"`"
 SELFDIR="`cd \"$SELFDIR\" && pwd`"
@@ -15,18 +21,28 @@ cd $SELFDIR/lib/app/
 
 ## GEMFILE
 if [ -f "$SELFDIR/lib/vendor/Gemfile" ]; then
+  echo "found a gemfile in $SELFDIR/lib/vendor/Gemfile"
+# if [ -f "$SELFDIR/lib/ruby/lib/vendor/Gemfile" ]; then
+## The above is traveling pacts included Gemfile
   # Tell Bundler where the Gemfile and gems are.
   export BUNDLE_GEMFILE="$SELFDIR/lib/vendor/Gemfile"
+  # export BUNDLE_GEMFILE="$SELFDIR/lib/ruby/lib/vendor/Gemfile"
   unset BUNDLE_IGNORE_CONFIG
 
   # Run the actual app using the bundled Ruby interpreter, with Bundler activated.
   if $4; then
+    echo "IS_RAILS is set"
+    echo "Running command $SELFDIR/lib/ruby/bin/ruby -rbundler/setup "bin/rails" server"
     export RAILS_ENV=production
+    # $SELFDIR/lib/ruby/bin/ruby -rbundler/setup "$SELFDIR/lib/ruby/bin.real/puma" server
+    # $SELFDIR/lib/ruby/bin/ruby -rbundler/setup "$SELFDIR/lib/ruby/bin.real/rails" server
     $SELFDIR/lib/ruby/bin/ruby -rbundler/setup "bin/rails" server
   else
+    echo "Running with bundler $SELFDIR/lib/ruby/bin/ruby -rbundler/setup $3 $ARGV"
     $SELFDIR/lib/ruby/bin/ruby -rbundler/setup "$3" $ARGV
   fi
 else
+  echo "Running command $SELFDIR/lib/ruby/bin/ruby $3 $ARGV"
   $SELFDIR/lib/ruby/bin/ruby "$3" $ARGV
 fi
 
