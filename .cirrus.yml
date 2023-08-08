@@ -6,7 +6,7 @@ BUILD_TEST_TASK_TEMPLATE: &BUILD_TEST_TASK_TEMPLATE
   # package_script: bundle exec rb2exe pact-broker-app.rb --target=$TARGET
   package_script: bundle exec rb2exe pact-broker-app.rb --target=$TARGET --daemon
   test_script: ./pact-broker-app ../ruby/config.ru
-  broker_wait_script: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- 127.0.0.1:9292 --timeout 60 -- echo "pact broker is up"
+  broker_wait_script: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 --timeout 60 -- echo "pact broker is up"
 
 macos_arm_task: 
   macos_instance:
@@ -37,16 +37,11 @@ macos_arm_task:
 linux_arm_task: 
   env:
     TARGET: la64
-    BUNDLE_APP_CONFIG: ''
   arm_container:
     image: ruby:3.2.2-slim
     cpu: 1
     memory: 1G
   pre_req_script: apt update --yes && apt install --yes git zip curl wget netcat-traditional
-  cirrus_cli_script: |
-    chmod +x bin/*
-    mkdir -p /tmp/cirrus-ci/working-dir/bin
-    touch /tmp/cirrus-ci/working-dir/bin/build
   bundler_setup_script: |
       gem install bundler -v 2.4.18
   << : *BUILD_TEST_TASK_TEMPLATE
@@ -58,6 +53,6 @@ linux_arm_task:
 #     image: ruby:3.2.2-slim
 #     cpu: 1
 #     memory: 1G
-#   pre_req_script: apt update --yes && apt install --yes git zip curl wget netcat
+#   pre_req_script: apt update --yes && apt install --yes git zip curl wget netcat-traditional
 #   ruby_setup_script: gem install bundler -v 2.4.18
 #   << : *BUILD_TEST_TASK_TEMPLATE
