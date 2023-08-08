@@ -1,1 +1,1 @@
-load Gem.bin_path("puma", "puma")
+load Gem.bin_path("rack", "rackup")

@@ -25,13 +25,14 @@ jobs:
     - name: download runtime
       run: bundle exec rake package
     - name: Bundle app for ${{ matrix.os }}
-      run: bundle exec rb2exe pact-broker-app.rb --target=lx64
+      run: bundle exec rb2exe pact-broker-app.rb --target=lx64 --daemon
       if: runner.os == 'Linux'
     - name: Bundle app for ${{ matrix.os }}
-      run: bundle exec rb2exe pact-broker-app.rb --target=ox64
+      run: bundle exec rb2exe pact-broker-app.rb --target=ox64 --daemon
       if: runner.os == 'MacOS'
     - name: Test app
       run: ./pact-broker-app
+    - run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 -- echo "pact broker is up"
     - name: Upload app
       uses: actions/upload-artifact@v3
       with:

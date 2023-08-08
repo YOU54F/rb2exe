@@ -3,8 +3,9 @@ BUILD_TEST_TASK_TEMPLATE: &BUILD_TEST_TASK_TEMPLATE
     - uname -am
   install_script: bundle install
   runtime_script: bundle exec rake package
-  package_script: bundle exec rb2exe pact-broker-app.rb --target=$TARGET
-  test_script: ./pact-broker-app
+  package_script: bundle exec rb2exe pact-broker-app.rb --target=$TARGET --daemon
+  test_script: ./pact-broker-app -C ../ruby/config.ru
+  broker_wait_script: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 -- echo "pact broker is up"
 
 macos_arm_task: 
   macos_instance:
