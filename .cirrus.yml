@@ -3,8 +3,8 @@ BUILD_TEST_TASK_TEMPLATE: &BUILD_TEST_TASK_TEMPLATE
     - uname -am
   install_script: bundle install
   runtime_script: bundle exec rake package
-  package_script: bundle exec rb2exe pact-broker-app.rb --target=$TARGET
-  # package_script: bundle exec rb2exe pact-broker-app.rb --target=$TARGET --daemon
+  # package_script: bundle exec rb2exe pact-broker-app.rb --target=$TARGET
+  package_script: bundle exec rb2exe pact-broker-app.rb --target=$TARGET --daemon
   test_script: ./pact-broker-app ../ruby/config.ru
   broker_wait_script: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 -- echo "pact broker is up"
 
@@ -20,19 +20,19 @@ macos_arm_task:
   binary_artifacts:
     path: "pkg/*"
 
-macos_x64_task: 
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-ventura-base:latest
-  ruby_version_script: ruby --version
-  env:
-    TARGET: ox64
-    USE_ROSETTA: arch -x86_64
-  cirrus_cli_script: |
-    chmod +x bin/*
-  rosetta_script: softwareupdate --install-rosetta --agree-to-license
-  << : *BUILD_TEST_TASK_TEMPLATE
-  binary_artifacts:
-    path: "pkg/*"
+# macos_x64_task: 
+#   macos_instance:
+#     image: ghcr.io/cirruslabs/macos-ventura-base:latest
+#   ruby_version_script: ruby --version
+#   env:
+#     TARGET: ox64
+#     USE_ROSETTA: arch -x86_64
+#   cirrus_cli_script: |
+#     chmod +x bin/*
+#   rosetta_script: softwareupdate --install-rosetta --agree-to-license
+#   << : *BUILD_TEST_TASK_TEMPLATE
+#   binary_artifacts:
+#     path: "pkg/*"
 
 linux_arm_task: 
   env:
@@ -50,13 +50,13 @@ linux_arm_task:
       gem install bundler -v 2.4.18
   << : *BUILD_TEST_TASK_TEMPLATE
 
-linux_amd_task: 
-  env:
-    TARGET: lx64
-  container:
-    image: ruby:3.2.2-slim
-    cpu: 1
-    memory: 1G
-  pre_req_script: apt update --yes && apt install --yes git zip curl wget
-  ruby_setup_script: gem install bundler -v 2.4.18
-  << : *BUILD_TEST_TASK_TEMPLATE
+# linux_amd_task: 
+#   env:
+#     TARGET: lx64
+#   container:
+#     image: ruby:3.2.2-slim
+#     cpu: 1
+#     memory: 1G
+#   pre_req_script: apt update --yes && apt install --yes git zip curl wget
+#   ruby_setup_script: gem install bundler -v 2.4.18
+#   << : *BUILD_TEST_TASK_TEMPLATE
