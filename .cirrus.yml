@@ -11,23 +11,69 @@ macos_arm_task:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   ruby_version_script: ruby --version
   env:
-    TARGET: ox64
+    TARGET: oa64
   cirrus_cli_script: |
     chmod +x bin/*
   << : *BUILD_TEST_TASK_TEMPLATE
   binary_artifacts:
     path: "pkg/*"
 
-# # BINARY_ env vars are set, so we only test our platform specific pact-ruby-standalone
-# builder_linux_arm_task: 
-#   env:
-#     BINARY_OS: linux
-#     BINARY_ARCH: arm64
-#     PATH: "$HOME/.rbenv/bin:/root/.rbenv/shims:$PATH"
-#   arm_container:
-#     image: ruby:3.2.2-slim
-#   pre_req_script:
-#       apt update --yes && apt install --yes zip curl
-#   << : *BUILD_TEST_TASK_TEMPLATE
-#   binary_artifacts:
-#     path: "pkg/*"
+macos_x64_task: 
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  ruby_version_script: ruby --version
+  env:
+    TARGET: ox64
+    USE_ROSETTA: arch -x86_64
+  cirrus_cli_script: |
+    chmod +x bin/*
+  rosetta_script: softwareupdate --install-rosetta --agree-to-license
+  << : *BUILD_TEST_TASK_TEMPLATE
+  binary_artifacts:
+    path: "pkg/*"
+
+linux_arm_task: 
+  env:
+    TARGET: la64
+    PATH: "/root/.rbenv/shims:/root/.rbenv/bin:$PATH"
+    TMPDIR: "/tmp"
+  arm_container:
+    # image: ubuntu:22.04
+    image: ruby:3.2.2-slim
+    cpu: 1
+    memory: 1G
+  pre_req_script: apt update --yes && apt install --yes git zip curl
+  # setup_script: |
+  #     echo $PATH
+  #     apt-get update
+  #     apt-get install -y --force-yes build-essential curl git
+  #     apt-get install -y --force-yes zlib1g-dev libssl-dev libreadline-dev libyaml-dev libxml2-dev libxslt-dev
+  #     apt-get clean
+  #     git clone https://github.com/rbenv/rbenv.git /root/.rbenv
+  #     git clone https://github.com/rbenv/ruby-build.git /root/.rbenv/plugins/ruby-build
+  #     rbenv install 3.2.2
+  #     rbenv global 3.2.2
+  #     ruby --version
+  cirrus_cli_script: |
+    chmod +x bin/*
+    mkdir -p /tmp/cirrus-ci/working-dir/bin
+    touch /tmp/cirrus-ci/working-dir/bin/build
+  bundler_setup_script: |
+      gem install bundler -v 2.4.18
+  << : *BUILD_TEST_TASK_TEMPLATE
+  # binary_artifacts:
+  #   path: "pkg/*"
+
+linux_amd_task: 
+  env:
+    TARGET: lx64
+    # PATH: "$HOME/.rbenv/bin:/root/.rbenv/shims:$PATH"
+  arm_container:
+    image: ruby:3.2.2-slim
+    cpu: 1
+    memory: 1G
+  pre_req_script: apt update --yes && apt install --yes git zip curl
+  ruby_setup_script: gem install bundler -v 2.4.18
+  << : *BUILD_TEST_TASK_TEMPLATE
+  # binary_artifacts:
+  #   path: "pkg/*"
