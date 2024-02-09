@@ -12,6 +12,40 @@ def blank?(arg)
   arg.to_s.strip == ''
 end
 
+platform = RUBY_PLATFORM
+arch = RbConfig::CONFIG["arch"]
+puts "Platform: #{platform}"
+puts "Architecture: #{arch}"
+
+platform = RUBY_PLATFORM
+arch = RbConfig::CONFIG["arch"]
+
+if platform =~ /mswin|mingw|cygwin/
+  target = "win"
+  # target = "windows"
+elsif platform =~ /darwin/
+  # target = "osx"
+  target = "o"
+elsif platform =~ /linux/
+  target = "l"
+  # target = "linux"
+else
+  target = "unknown"
+end
+
+if arch =~ /aarch64|arm64/
+  target += "a64"
+  # target += "-arm64"
+elsif arch =~ /x86_64/
+  target += "x64"
+  # target += "-x86_64"
+elsif arch =~ /i\d86/
+  target += "x86"
+  # target += "-x86"
+else
+  target += "-unknown"
+end
+
 # Arguments
 options = {
   quiet: false,
@@ -21,7 +55,7 @@ options = {
   output: nil,
   rails: false,
   daemon: false,
-  target: 'lx64'
+  target: target
 }
 opt_parser = OptionParser.new do |opts|
   opts.banner = 'Usage: rb2exe RUBY_SCRIPT [options]'
@@ -49,7 +83,7 @@ gem_dir = File.expand_path(File.dirname(__FILE__) + '/..')
 main_app_path = ARGV[0]
 abort(opt_parser.to_s) if !options[:rails] && blank?(main_app_path)
 abort("#{ARGV[0]} doesn't exist.") if !options[:rails] && !File.exist?(ARGV[0])
-
+puts "Building for target #{options[:target]}." unless options[:quiet]
 # App directory
 pwd = Dir.pwd
 if options[:rails] and options[:add].nil?
@@ -94,6 +128,7 @@ Dir.mktmpdir do |tmp_dir|
              when 'win86' then "#{gem_dir}/bin/traveling-ruby-3.2.2/win86"
              else abort("Unknow platform (#{options[:target]})")
   end
+  puts("Copying #{ruby_src} to #{tmp_dir}/payload/lib/ruby") unless options[:quiet]
   FileUtils.cp_r(ruby_src, "#{tmp_dir}/payload/lib/ruby")
 
   # Move the "app" folder to "payload/lib"
@@ -128,6 +163,8 @@ Dir.mktmpdir do |tmp_dir|
     # Create a bundler config
     FileUtils.mkdir_p("#{tmp_dir}/payload/lib/vendor/.bundle")
     FileUtils.cp("#{gem_dir}/lib/bundler-config", "#{tmp_dir}/payload/lib/vendor/.bundle/config")
+    # FileUtils.rm_rf("#{tmp_dir}/payload/lib/ruby/vendor")
+    # FileUtils.mv("#{tmp_dir}/payload/lib/vendor", "#{tmp_dir}/payload/lib/ruby")
   end
 
   # ignore folder: remove folder (usually .git)

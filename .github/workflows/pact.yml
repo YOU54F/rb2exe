@@ -1,0 +1,64 @@
+name: Build
+
+on: 
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest","macos-latest"]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.2.2
+    - name: Set up bundler
+      run: gem install bundler -v 2.4.18
+    - name: Set up environment
+      run: bundle install
+    - name: download runtime
+      run: bundle exec rake package
+    - name: Bundle app for ${{ matrix.os }}
+      # run: bundle exec rb2exe pact-broker-app.rb --target=lx64
+      run: bundle exec rb2exe pact-broker-app.rb --target=lx64 --daemon
+      if: runner.os == 'Linux'
+    - name: Bundle app for ${{ matrix.os }}
+      # run: bundle exec rb2exe pact-broker-app.rb --target=ox64
+      run: bundle exec rb2exe pact-broker-app.rb --target=ox64 --daemon
+      if: runner.os == 'MacOS'
+    - name: Test app
+      run: ./pact-broker-app ../ruby/config.ru -P ~/pact_broker.pid
+    - run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 -- echo "pact broker is up"
+    - run: cat ~/pact_broker.pid | xargs kill
+    - name: Upload app
+      uses: actions/upload-artifact@v3
+      with:
+        name: pact-broker-app-${{ matrix.os }}
+        path: pact-broker-app
+  test:
+    defaults:
+      run:
+        shell: sh
+    needs: [build]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest","macos-latest"]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Download all workflow run artifacts
+      uses: actions/download-artifact@v3
+    - name: test ${{ matrix.os }} package
+      run: |
+        ls pact-broker-app-${{ matrix.os }}
+        chmod +x pact-broker-app-${{ matrix.os }}/pact-broker-app
+        ./pact-broker-app-${{ matrix.os }}/pact-broker-app ../ruby/config.ru -P ~/pact_broker.pid
+    - run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/4df3f9262d84cab0039c07bf861045fbb3c20ab7/wait-for | sh -s -- localhost:9292 -- echo "pact broker is up"
+    - run: cat ~/pact_broker.pid | xargs kill
